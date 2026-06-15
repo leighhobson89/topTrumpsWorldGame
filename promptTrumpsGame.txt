@@ -1,0 +1,393 @@
+Here is a **clean, implementation-ready MASTER PROMPT for your Phase 1 prototype**, updated with your exact dataset path, structure, and gameplay vision.
+
+You can paste this directly into an AI coding agent (or use it as your internal spec).
+
+---
+
+# 🎮 MASTER PROMPT — WORLD CONQUEST TOP TRUMPS PROTOTYPE (PHASE 1)
+
+You are a **senior full-stack game engineer**. Build a complete working **Phase 1 browser-based prototype** of a territory conquest card game.
+
+The output must be a **fully working JavaScript (or TypeScript) project** with simple UI (HTML/CSS/Canvas/React acceptable but not required). Prioritize clarity and correctness over aesthetics.
+
+---
+
+# 📦 DATA SOURCE (IMPORTANT)
+
+All game data comes from:
+
+```text
+./dataset/countryTerritoriesData.json
+```
+
+### Structure:
+
+```json
+[
+  {
+    "country": "United States",
+    "territories": [
+      {
+        "name": "New York City",
+        "ECON_RANK": 1,
+        "POP_RANK": 1,
+        "MIL_RANK": 82,
+        "TECH_RANK": 1,
+        "STB_RANK": 152,
+        "AREA_RANK": 24,
+        "country": "United States"
+      }
+    ]
+  }
+]
+```
+
+Each country contains ~30 territories.
+
+---
+
+# 🗺️ PHASE 1 GAME SCOPE (IMPORTANT CONSTRAINT)
+
+This is **single-country gameplay only**.
+
+### Flow:
+
+1. Player selects a country
+2. Game loads ONLY that country’s territories
+3. Game renders a **zoomed-in map view of that country**
+4. Gameplay happens entirely inside that country
+5. No cross-country movement (Phase 2 only later)
+
+---
+
+# 🎯 CORE GAME OBJECTIVE
+
+Player vs AI battle inside one country:
+
+> Conquer all territories OR lose all territories
+
+Win condition:
+
+* Player owns all territories → PLAYER WINS
+
+Lose condition:
+
+* AI owns all territories → PLAYER LOSES
+
+---
+
+# 🧠 GAME MODEL
+
+Each territory is a **card-node on a map**.
+
+Each territory has:
+
+* ECON_RANK
+* POP_RANK
+* MIL_RANK
+* TECH_RANK
+* STB_RANK
+* AREA_RANK
+
+These are **absolute global ranks (already precomputed)**:
+
+* Lower = stronger
+* 1 = best in dataset
+* Higher number = weaker
+
+DO NOT regenerate or modify ranks.
+
+---
+
+# 🗺️ MAP SYSTEM (PHASE 1 SIMPLIFIED)
+
+Render a **2D country map abstraction**:
+
+* Each territory is a clickable node (circle or tile)
+* Position can be:
+
+  * simple grid layout OR
+  * randomized stable layout per country (preferred)
+
+### Territory coloring:
+
+* Player-owned → BLUE
+* AI-owned → RED
+* Neutral (start state optional) → GREY
+
+---
+
+# 🎮 INITIAL STATE
+
+When country loads:
+
+* Player starts with ~50% of territories (or configurable rule)
+* AI owns remaining 50%
+* Distribution should be **balanced spatially if possible**
+
+---
+
+# 🃏 CORE GAMEPLAY LOOP
+
+## STEP 1 — SELECT ATTACKER
+
+Player clicks a territory they own.
+
+UI shows:
+
+* Territory card (right panel)
+* Stats visible
+
+Button:
+
+* “ATTACK”
+
+---
+
+## STEP 2 — SELECT TARGET
+
+Player clicks enemy territory.
+
+UI shows:
+
+* Target territory card (hidden stats OR partial reveal depending on design choice)
+
+---
+
+## STEP 3 — STAT SELECTION
+
+Player selects ONE stat:
+
+* ECON
+* POP
+* MIL
+* TECH
+* STB
+* AREA
+
+---
+
+## STEP 4 — COMBAT RESOLUTION
+
+### RULE:
+
+```text
+LOWER RANK WINS
+```
+
+Compare:
+
+```text
+attacker_stat_rank vs defender_stat_rank
+```
+
+---
+
+## STEP 5 — AI DEFENSE SYSTEM (IMPORTANT)
+
+AI does NOT randomly pick best stat.
+
+Instead:
+
+### AI behavior:
+
+1. It sees attacker territory NAME + chosen stat
+2. It does NOT see attacker numeric rank values
+3. It selects ONE defending territory it owns
+4. It selects a defending stat using heuristic:
+
+AI strategy:
+
+* If losing badly → minimize loss (choose best available stat)
+* If likely winning → choose strongest counter-stat
+* If unsure → probabilistic choice weighted toward MIL/TECH/STB
+
+---
+
+## STEP 6 — WIN/LOSS LOGIC
+
+### If attacker wins:
+
+* Attacker captures target territory
+* Target becomes attacker-owned
+
+### If defender wins:
+
+* No change in ownership
+
+---
+
+# 🔁 TURN SYSTEM
+
+## Player Turn:
+
+* Player can attack repeatedly until:
+
+  * they lose an attack OR
+  * optional cooldown triggers
+
+## AI Turn:
+
+* AI immediately counter-attacks after player loss OR randomly attacks after interval
+
+Simplify for Phase 1:
+
+* Turn alternates strictly after each battle
+
+---
+
+# 🧱 CARD COOLDOWN RULE
+
+After a territory is used to attack OR defend:
+
+```text
+cooldown = 2 turns
+```
+
+During cooldown:
+
+* cannot attack
+* still can be attacked
+
+---
+
+# 🧠 AI OVERWORLD STRATEGY (SIMPLE VERSION)
+
+AI prioritizes:
+
+1. Capturing weak player territories (high rank numbers)
+2. Defending high-value territories (low rank numbers)
+3. Expanding contiguous control (if adjacency is implemented)
+
+If adjacency is NOT implemented:
+
+* AI chooses highest ECON_RANK advantage targets first
+
+---
+
+# 🧩 UI REQUIREMENTS
+
+Must include:
+
+### Left Panel:
+
+* Map of territories (clickable nodes)
+
+### Right Panel:
+
+* Selected territory card
+* Stats
+* Attack button
+* Stat selection buttons
+
+### Top Bar:
+
+* Player territories count
+* AI territories count
+* Country name
+
+---
+
+# 🧾 STATE STRUCTURE (FRONTEND)
+
+```js
+gameState = {
+  country: "United States",
+  territories: [
+    {
+      name,
+      owner: "PLAYER" | "AI",
+      stats: {...},
+      cooldown: 0
+    }
+  ],
+  selectedAttacker: null,
+  selectedTarget: null,
+  phase: "SELECT_ATTACKER" | "SELECT_TARGET" | "SELECT_STAT" | "RESOLVING"
+}
+```
+
+---
+
+# ⚙️ CORE ENGINE RULES
+
+### Ownership update:
+
+* If territory changes owner → update instantly in state
+
+### Cooldown tick:
+
+* after each full turn, decrement cooldown values
+
+### Valid attack rules:
+
+* cannot attack own territory
+* cannot use attacker if cooldown > 0
+
+---
+
+# 🏁 END CONDITIONS
+
+Game ends when:
+
+### Player wins:
+
+* owns 100% territories
+
+### AI wins:
+
+* owns 100% territories
+
+Show end screen:
+
+* winner
+* stats summary (turns taken, captures)
+
+---
+
+# 🎨 VISUAL STYLE (MINIMAL)
+
+Do NOT overbuild.
+
+Use:
+
+* circles or dots for territories
+* color coding for ownership
+* simple hover tooltips
+* simple card UI
+
+---
+
+# 🚀 IMPLEMENTATION REQUIREMENTS
+
+You must generate:
+
+1. Full working frontend app
+2. Loader for JSON dataset
+3. Game state engine
+4. Combat resolver
+5. AI decision logic
+6. Map rendering system
+7. UI interaction system
+8. Win/loss detection
+9. Cooldown system
+
+---
+
+# ⚠️ CRITICAL RULES
+
+* Do NOT generate new ranks
+* Do NOT modify dataset values
+* Do NOT simulate geography realism yet
+* Do NOT build multi-country gameplay (Phase 2 only)
+* Keep logic deterministic and debuggable
+
+---
+
+# 🧠 DESIGN INTENT
+
+This is:
+
+> A deterministic, rank-based territory card battler where geography is a visual wrapper for a structured global ranking system.
+
+---

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>World Conquest Top Trumps</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="top-bar">
+        <div>
+          <p class="eyebrow">Phase 1 prototype</p>
+          <h1>World Conquest Top Trumps</h1>
+        </div>
+        <label class="country-picker">
+          Country
+          <select id="countrySelect" aria-label="Select country"></select>
+        </label>
+        <div class="scoreboard" aria-live="polite">
+          <span class="score player">Player <strong id="playerCount">0</strong></span>
+          <span class="score ai">AI <strong id="aiCount">0</strong></span>
+          <span class="score neutral">Turn <strong id="turnCount">0</strong></span>
+        </div>
+      </header>
+
+      <section class="status-strip">
+        <strong id="phaseLabel">Loading data…</strong>
+        <span id="statusText">Preparing the battlefield.</span>
+      </section>
+
+      <section class="game-layout">
+        <section class="map-panel" aria-labelledby="mapTitle">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Single-country map</p>
+              <h2 id="mapTitle">Territories</h2>
+            </div>
+            <button id="restartButton" class="ghost-button" type="button">Restart country</button>
+          </div>
+          <svg id="mapSvg" class="territory-map" viewBox="0 0 1000 700" role="img" aria-label="Territory control map"></svg>
+          <div class="legend">
+            <span><i class="dot player"></i>Player</span>
+            <span><i class="dot ai"></i>AI</span>
+            <span><i class="ring"></i>Cooldown</span>
+          </div>
+        </section>
+
+        <aside class="control-panel" aria-label="Battle controls">
+          <section class="card selected-card">
+            <p class="eyebrow">Selected attacker</p>
+            <div id="attackerCard" class="empty-card">Select a blue territory.</div>
+            <button id="attackButton" class="primary-button" type="button" disabled>Attack</button>
+          </section>
+
+          <section class="card">
+            <p class="eyebrow">Selected target</p>
+            <div id="targetCard" class="empty-card">Press Attack, then select a red territory.</div>
+          </section>
+
+          <section class="card">
+            <p class="eyebrow">Choose attack stat</p>
+            <div id="statButtons" class="stat-buttons"></div>
+          </section>
+
+          <section class="card">
+            <p class="eyebrow">Battle log</p>
+            <ol id="battleLog" class="battle-log"></ol>
+          </section>
+        </aside>
+      </section>
+
+      <section id="endScreen" class="end-screen" hidden>
+        <div class="end-card">
+          <p class="eyebrow">Game over</p>
+          <h2 id="winnerText"></h2>
+          <p id="summaryText"></p>
+          <button id="playAgainButton" class="primary-button" type="button">Play again</button>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
